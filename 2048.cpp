@@ -196,7 +196,16 @@ private:
     void make2RandomPoints() {
         //When initilizing board create 2 random tiles with value 2
         std::pair<int,int> randomPoints{generateRandomInt(),generateRandomInt()};
-        std::pair<int, int> randomPoints2{ generateRandomInt(),generateRandomInt() };
+        std::pair<int, int> randomPoints2{};
+        while (true) {
+            int a{ generateRandomInt() };
+            int b{ generateRandomInt() };
+            if (randomPoints.first != a && randomPoints.second != b) {
+                randomPoints2.first = a;
+                randomPoints2.second = b;
+                break;
+            }
+        }
         sf::Vector2f randomPoint1Vector{ m_board[randomPoints.first][randomPoints.second].getPosition()};
         sf::Vector2f randomPoint2Vector{ m_board[randomPoints2.first][randomPoints2.second].getPosition() };
         m_board[randomPoints.first][randomPoints.second] = Tile{ m_rectSize,2,randomPoint1Vector, m_font };
@@ -226,8 +235,8 @@ private:
     void checkAndMoveTile(Direction dir) {
         bool tileMoved{ false };
         if (dir == Direction::Down) {
-            for (int i = m_rows - 2; i >= 0; --i) { // start from the second last row
-                for (int j = 0; j < m_cols; ++j) {
+            for (int i{ m_rows - 2 }; i >= 0; --i) { // start from the second last row
+                for (int j{ 0 }; j < m_cols; ++j) {
                     if (m_board[i][j].getValue() != 0) {
                         std::cout << "not zero\n";
                         int k = i;
@@ -256,8 +265,8 @@ private:
             }
         }
         else if (dir == Direction::Up) {
-            for (int i = 1; i < m_rows; ++i) { 
-                for (int j = 0; j < m_cols; ++j) {
+            for (int i{ 1 }; i < m_rows; ++i) {
+                for (int j{ 0 }; j < m_cols; ++j) {
                     if (m_board[i][j].getValue() != 0) {
                         std::cout << "not zero\n";
                         int k = i;
@@ -285,8 +294,8 @@ private:
             }
         }
         else if (dir == Direction::Right) {
-            for (int i = 0; i < m_rows; ++i) {
-                for (int j = m_cols - 2; j >= 0; --j) {
+            for (int i{ 0 }; i < m_rows; ++i) {
+                for (int j{ m_cols - 2 }; j >= 0; --j) {
                     if (m_board[i][j].getValue() != 0) {
                         std::cout << "not zero\n";
                         int k = j;
@@ -314,8 +323,8 @@ private:
             }
         }
         else if (dir == Direction::Left) {
-            for (int i = 0; i < m_rows; ++i) {
-                for (int j = 1; j < m_cols; ++j) { 
+            for (int i{ 0 }; i < m_rows; ++i) {
+                for (int j{ 1 }; j < m_cols; ++j) {
                     if (m_board[i][j].getValue() != 0) {
                         std::cout << "not zero\n";
                         int k = j;
@@ -349,6 +358,10 @@ private:
            // std::this_thread::sleep_for(std::chrono::milliseconds(100)); // added timeout because tiles were spawning in too fast after moving a tile causing it to look like undefined behavior 
             generateTile();
         }
+        else if (checkLoss()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            displayLoseScreen();
+        }
 
     }
     void moveTiles(sf::Event event) {
@@ -381,9 +394,7 @@ private:
             if (hasEmptyTile) break;
         }
 
-        if (!hasEmptyTile && checkLoss()) {
-            std::cerr << "No empty tiles available!" << std::endl;
-            displayLoseScreen();
+        if (!hasEmptyTile) {
             return; // exit the function if no empty tiles are available
         }
 
@@ -418,7 +429,7 @@ private:
                 if ((i > 0 && currentValue == m_board[i - 1][j].getValue()) || // Up
                     (i < m_rows - 1 && currentValue == m_board[i + 1][j].getValue()) || // Down
                     (j > 0 && currentValue == m_board[i][j - 1].getValue()) || // Left
-                    (j < m_cols - 1 && currentValue == m_board[i][j + 1].getValue())) { // Right
+                    (j < m_cols - 1 && currentValue == m_board[i][j + 1].getValue()) || currentValue == 0) { // Right
                     return false;
                 }
             }
